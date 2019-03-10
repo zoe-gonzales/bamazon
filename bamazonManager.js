@@ -47,7 +47,7 @@ function viewMenu(){
         {
             type: 'rawlist',
             message: 'Please select a menu item from the following:',
-            choices: ['View Products', 'View Products with Low Inventory', 'Update Current Inventory', 'Add New Product', 'Logout'],
+            choices: ['View Products', 'View Products with Low Inventory', 'Update Current Inventory', 'Add New Product', 'Delete a Product', 'Logout'],
             name: 'action'
         }
     ).then(function(reply){
@@ -64,8 +64,11 @@ function viewMenu(){
             case 'Add New Product':
                 addProduct();
             break;
+            case 'Delete a Product':
+                deleteProduct();
+            break;
             case 'Logout':
-                console.log('You are successfully logged out.');
+                console.log('You have successfully logged out.');
                 connection.end();
             break;
         }
@@ -236,6 +239,49 @@ function addProduct(){
             }
         );
     });
+}
+
+function deleteProduct(){
+    connection.query(
+        'SELECT product_name, item_id FROM products',
+        function(error, selectResponse){
+            inquirer
+            .prompt(
+                {
+                    name: 'productToDelete',
+                    message: 'Which product would you like to remove?',
+                    type: 'rawlist',
+                    // generates product list from select query above
+                    choices: function(){
+                        var productsArr = [];
+                        for (var i=0; i < selectResponse.length; i++){
+                            productsArr.push(selectResponse[i].product_name);
+                        }
+                        return productsArr;
+                    }
+                }
+            ).then(function(reply){
+                var selectedProduct;
+                for (var i=0; i < selectResponse.length; i++){
+                    if (selectResponse[i].product_name === reply.productToDelete){
+                        selectedProduct = selectResponse[i];
+                    }
+                }
+                // delete query to remove item from bamazon
+                connection.query(
+                    'DELETE FROM products WHERE ?',
+                    {
+                        item_id: selectedProduct.item_id
+                    },
+                    function(error, deleteResponse){
+                        if (error) throw error;
+                        console.log(`${deleteResponse.affectedRows} product deleted.`);
+                        promptNextAction();
+                    }
+                );
+            });
+        }
+    );    
 }
 
 // Prompts user to return to main menu or logout
