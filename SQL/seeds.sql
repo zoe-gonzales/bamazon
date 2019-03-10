@@ -14,3 +14,20 @@ VALUES
 ('socks', "clothing - general", 12.99, 40),
 ('wine glasses 4 pack', "glassware", 40.89, 15),
 ('portable hard drive', "electronics", 89.99, 9);
+
+
+INSERT INTO departments (department_name, over_head_costs)
+VALUES 
+("women's shoes", 10000.99),
+("small appliances", 10000.99),
+("furniture", 10000.99),
+("men's clothing", 10000.99),
+("small appliances", 10000.99),
+("women's clothing", 10000.99),
+("office", 10000.99),
+("bath", 10000.99),
+("bags & luggage", 10000.99),
+("shoes - general", 10000.99),
+("clothing - general", 10000.99),
+("glassware", 10000.99),
+("electronics", 10000.99);

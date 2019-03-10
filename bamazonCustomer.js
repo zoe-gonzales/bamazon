@@ -94,7 +94,7 @@ function browseBamazon(){
 
 function checkItemQuantity(product_id, requested_num){
     connection.query(
-        'SELECT stock_quantity, price FROM products WHERE ?',
+        'SELECT stock_quantity, price, product_sales FROM products WHERE ?',
         {
             item_id: product_id
         },
@@ -105,7 +105,14 @@ function checkItemQuantity(product_id, requested_num){
             if (itemQuantity >= requested_num){
                 // if there's enough, update quantity and run function to update in bamazon
                 itemQuantity -= requested_num;
-                updateItemQuantity(itemQuantity, requested_num, product_id, response[0].price);
+                var productDetails = {
+                    itemQuantity: itemQuantity,
+                    requestedNum: requested_num,
+                    totalSales: response[0].product_sales,
+                    productId: product_id,
+                    productPrice: response[0].price
+                }
+                updateItemQuantity(productDetails);
             } else {
                 // Else notify customer
                 console.log('Insufficient quantity for this item.');
@@ -114,9 +121,9 @@ function checkItemQuantity(product_id, requested_num){
     );
 }
 
-function updateItemQuantity(quantity, requested, product_id, product_price){
+function updateItemQuantity(obj){
     // Generates customer's total and prints to console
-    var customerTotal = requested * product_price;
+    var customerTotal = obj.requestedNum * obj.productPrice;
     console.log(`Your cart's total is $${customerTotal}.`);
     
     // Prompts customer if they'd like to go through with transaction
@@ -131,9 +138,17 @@ function updateItemQuantity(quantity, requested, product_id, product_price){
     ).then(function(reply){
         if (reply.purchase){
             // if yes, runs update query to reduce stock_quantity of product by customer's request quantity
+            obj.totalSales += customerTotal;
             connection.query(
-                'UPDATE products SET stock_quantity = ? WHERE item_id = ?',
-                [quantity, product_id],
+                'UPDATE products SET ? WHERE item_id = ?',
+                [
+                    {
+                        stock_quantity: obj.itemQuantity,
+                        product_sales: obj.totalSales
+                    },
+
+                    obj.productId
+                ],
                 function(error){
                     if (error) throw error;
                     // Notification of successful update
