@@ -105,7 +105,7 @@ function checkItemQuantity(product_id, requested_num){
 
 function updateItemQuantity(quantity, requested, product_id, product_price){
     var customerTotal = requested * product_price;
-    console.log(`Your total cost is $${customerTotal}.`);
+    console.log(`Your cart's total is $${customerTotal}.`);
     inquirer
     .prompt(
         {
