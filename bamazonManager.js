@@ -9,13 +9,14 @@ var connection = mysql.createConnection({
     database: 'bamazon'
 });
 
+// connecting to bamazon db
 connection.connect(function(error){
     if (error) console.log(error);
     // console.log('connected as id ' + connection.threadId);
-    // logIn();
-    viewMenu();
+    logIn();
 });
 
+// Prompts user for manager login credentials
 function logIn(){
     inquirer
     .prompt([
@@ -38,6 +39,7 @@ function logIn(){
     });
 }
 
+// Shows menu options through inquirer rawlist
 function viewMenu(){
     console.log('Welcome to Bamazon Manager View!');
     inquirer
@@ -63,6 +65,7 @@ function viewMenu(){
                 addProduct();
             break;
             case 'Logout':
+                console.log('You are successfully logged out.');
                 connection.end();
             break;
         }
@@ -70,6 +73,7 @@ function viewMenu(){
     });
 }
 
+// Selects and displays all products in bamazon db
 function viewProducts(){
     connection.query(
         'SELECT item_id, product_name, price, stock_quantity FROM products',
@@ -85,22 +89,28 @@ function viewProducts(){
     );
 }
 
+// Selects and displays products with current stock of less than 5
 function lowInventory(){
     connection.query(
         'SELECT item_id, product_name, stock_quantity FROM products WHERE stock_quantity < 5',
         function(error, response){
             if (error) throw error;
-            for (var i=0; i < response.length; i++){
-                console.log(
-                    `Product name: ${response[i].product_name} | Product id: ${response[i].item_id} | Quantity in Stock: ${response[i].stock_quantity} \n`
-                );
+            // Check in place in case there are no products with < 5 quantity
+            if (response.length < 1){
+                console.log('All products are sufficiently stocked.');
+            } else {
+                for (var i=0; i < response.length; i++){
+                    console.log(`Product name: ${response[i].product_name} | Product id: ${response[i].item_id} | Quantity in Stock: ${response[i].stock_quantity} \n`);
+                }
             }
             promptNextAction();
         }
     );
 }
 
+// Enables manager to update the stock quantity of existing product
 function updateInventory(){
+    // select query retrieves product names for display /  product id in order to execute the update query below
     connection.query(
         'SELECT product_name, item_id FROM products',
         function(error, selectResponse){
@@ -110,6 +120,7 @@ function updateInventory(){
                 {
                     type: 'rawlist',
                     message: 'Which product would you like to restock?',
+                    // generates product list from select query above
                     choices: function(){
                         var productsArr = [];
                         for (var i=0; i < selectResponse.length; i++){
@@ -122,20 +133,23 @@ function updateInventory(){
                 {
                     name: 'newQuantity',
                     message: 'Please enter the total desired units for this product:',
+                    // Validation requires that input is an integer greater than 0
                     validate: function(input){
-                        if (isNaN(input) === false && input >= 0){
+                        if (isNaN(input) === false && input >= 0 && parseFloat(input) === parseInt(input)){
                             return true;
                         }
                         return false;
                     }
                 }
             ]).then(function(reply){
+                // identifies and assigns to new variable the object of current product
                 var selectedProduct;
                 for (var i=0; i < selectResponse.length; i++){
                     if (selectResponse[i].product_name === reply.itemToUpdate){
                         selectedProduct = selectResponse[i];
                     }
                 }
+                // update query replaces existing stock quantity with user input 
                 connection.query(
                     'UPDATE products SET ? WHERE ?',
                     [
@@ -148,7 +162,7 @@ function updateInventory(){
                     ], 
                     function(error, updateResponse){
                         if (error) throw error;
-                        console.log(`Inventory for ${updateResponse.affectedRows} item successfully updated.`);
+                        console.log(`Inventory for ${updateResponse.affectedRows} product successfully updated.`);
                         promptNextAction();
                     }
                 );
@@ -157,11 +171,74 @@ function updateInventory(){
     );
 }
 
-// If a manager selects Add New Product, it should allow the manager to add a completely new product to the store.
+// Enables manager to add a new product to bamazon db
 function addProduct(){
-
+    inquirer
+    .prompt([
+        {
+            name: 'productName',
+            message: 'Product name:',
+            // Validation requires that input is not null
+            validate: function(input){
+                if (input){
+                    return true;
+                }
+                return false;
+            }
+        },
+        {
+            name: 'department',
+            message: 'Product department:',
+            // Validation requires that input is not null
+            validate: function(input){
+                if (input){
+                    return true;
+                }
+                return false;
+            }
+        },
+        {
+            name: 'productPrice',
+            message: 'Price:',
+            // Validation requires that input is a number greater than 0 - accepts floats
+            validate: function(input){
+                if (isNaN(input) === false && input > 0){
+                    return true;
+                }
+                return false;
+            }
+        },
+        {
+            name: 'productQuantity',
+            message: 'Stock Quantity:',
+            // Validation requires that input is an integer greater than 0
+            validate: function(input){
+                if (isNaN(input) === false && input > 0 && parseFloat(input) === parseInt(input)){
+                    return true;
+                }
+                return false;
+            }
+        }
+    ]).then(function(reply){
+        // inserting user input into bamazon
+        connection.query(
+            'INSERT INTO products SET ?',
+            {
+                product_name: reply.productName,
+                department_name: reply.department,
+                price: reply.productPrice,
+                stock_quantity: reply.productQuantity
+            },
+            function(error, insertResponse){
+                if (error) throw error;
+                console.log(`${insertResponse.affectedRows} product successfully added.`);
+                promptNextAction();
+            }
+        );
+    });
 }
 
+// Prompts user to return to main menu or logout
 function promptNextAction(){
     inquirer
     .prompt(
