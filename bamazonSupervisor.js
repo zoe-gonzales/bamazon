@@ -17,6 +17,7 @@ connection.connect(function(error){
     logIn();
 });
 
+// Prompting for username and password to access main menu
 function logIn(){
     inquirer
     .prompt([
@@ -39,6 +40,7 @@ function logIn(){
     });
 }
 
+// Main menu view
 function viewMenu(){
     console.log('Welcome to Bamazon Supervisor View!');
     inquirer
@@ -62,10 +64,10 @@ function viewMenu(){
                 connection.end();
             break;
         }
-
     });
 }
 
+// Displays id, dept. name, overhead, total sales, and total profits for all departments
 function viewSales(){
     // variables necessary for table package
     var data = [
@@ -100,7 +102,7 @@ function viewSales(){
                 var deptName = response[i].department_name;
                 department.push(deptID, deptName, overHead, totalSales, profit);       data.push(department);
             }
-            
+
             // transform and display data
             output = table(data);
             console.log(output);
@@ -111,6 +113,50 @@ function viewSales(){
     );
 }
 
+// Creates new department based on user input
 function createDept(){
+    // prompting user for new dept. name and overhead cost
+    inquirer
+    .prompt([
+        {
+            name: 'departmentName',
+            message: 'Department name:',
+            // Validation requires that input is not null
+            validate: function(input){
+                if (input){
+                    return true;
+                }
+                return false;
+            }
+        },
+        {
+            name: 'overhead',
+            message: 'Department overhead costs:',
+            // Validation requires that input is a number greater than 0
+            validate: function(input){
+                if (isNaN(input) === false && input > 0){
+                    return true;
+                }
+                return false;
+            }
+        }
+    ]).then(function(reply){
+        // query to insert new dept. data into bamazon db
+        connection.query(
+            'INSERT INTO departments SET ?',
+            {
+                department_name: reply.departmentName,
+                over_head_costs: reply.overhead
+            },
+            function(error, response){
+                if (error) throw error;
 
+                // department successfully added
+                console.log(`${response.affectedRows} department successfully added.`);
+                
+                // Return to main menu
+                viewMenu();
+            }
+        );
+    }); 
 }
