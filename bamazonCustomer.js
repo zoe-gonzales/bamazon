@@ -1,6 +1,11 @@
 
+// Node packages
 var mysql = require('mysql');
 var inquirer = require('inquirer');
+
+// Constructor
+var Validation = require('./validation');
+var validation = new Validation();
 
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -62,6 +67,7 @@ function browseBamazon(){
                     console.log(`Product: ${response[i].product_name} \n Id: ${response[i].item_id} \n Price: $${response[i].price}`);
                 }
             }
+            
             // prompts for id to confirm and the desired quantity
             inquirer
             .prompt([
@@ -72,13 +78,7 @@ function browseBamazon(){
                 {
                     name: 'quantity',
                     message: `How many ${selectedItem.product_name}s would you like to buy?`,
-                    // Validation that input is an integer greater than 0 
-                    validate: function(input){
-                        if (isNaN(input) === false && input > 0 && parseFloat(input) === parseInt(input)){
-                            return true;
-                        }
-                        return false;
-                    }
+                    validate: input => validation.validInt(input)
                 }
             ]).then(function(reply){
                 // saving & parsing input

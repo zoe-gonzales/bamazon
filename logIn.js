@@ -9,11 +9,6 @@ var connection = mysql.createConnection({
     database: 'bamazon'
 });
 
-// connecting to bamazon db
-connection.connect(function(error){
-    if (error) console.log(error);
-});
-
 function LogIn(id, callback){
     this.logInUser = function(){
         inquirer
@@ -45,6 +40,9 @@ function LogIn(id, callback){
                 }
             );
         });
+    };
+    this.logOutUser = function(){
+        connection.end();
     }
 }
 

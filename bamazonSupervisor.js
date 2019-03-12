@@ -1,8 +1,14 @@
 
+// Node packages
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 const {table} = require('table');
+
+// Constructors
 var LogIn = require('./logIn');
+var logIn = new LogIn(2, viewMenu);
+var Validation = require('./validation');
+var validation = new Validation();
 
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -15,7 +21,6 @@ var connection = mysql.createConnection({
 connection.connect(function(error){
     if (error) console.log(error);
     // Prompting for username and password to access main menu
-    var logIn = new LogIn(2, viewMenu);
     logIn.logInUser();
 });
 
@@ -40,6 +45,7 @@ function viewMenu(){
             break;
             case 'Logout':
                 console.log('Thanks for visiting! Come back again soon!');
+                logIn.logOutUser();
                 connection.end();
             break;
         }
@@ -54,7 +60,7 @@ function viewSales(){
     ];
     var output;
     // select query for department_id, departments.department_name, over_head_costs, product_sales
-    // left join on dept. ana product ids
+    // inner join on dept. names for departments and products tables
     connection.query(
         'SELECT department_id, departments.department_name, over_head_costs, product_sales FROM departments INNER JOIN products ON departments.department_name = products.department_name',
         function(error, response){
@@ -79,7 +85,7 @@ function viewSales(){
                 var totalSales = response[i].product_sales;
                 var profit = totalProfit(overHead, totalSales);
                 var deptName = response[i].department_name;
-                department.push(deptID, deptName, overHead, totalSales, profit);       data.push(department);
+                department.push(deptID, deptName, overHead, totalSales, profit);data.push(department);
             }
 
             // transform and display data
@@ -101,23 +107,13 @@ function createDept(){
             name: 'departmentName',
             message: 'Department name:',
             // Validation requires that input is not null
-            validate: function(input){
-                if (input){
-                    return true;
-                }
-                return false;
-            }
+            validate: input => validation.validStr(input)
         },
         {
             name: 'overhead',
             message: 'Department overhead costs:',
             // Validation requires that input is a number greater than 0
-            validate: function(input){
-                if (isNaN(input) === false && input > 0){
-                    return true;
-                }
-                return false;
-            }
+            validate: input => validation.validNum(input)
         }
     ]).then(function(reply){
         // query to insert new dept. data into bamazon db

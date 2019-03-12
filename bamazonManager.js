@@ -1,7 +1,13 @@
 
+// Node packages
 var mysql = require('mysql');
 var inquirer = require('inquirer');
+
+// Constructors
 var LogIn = require('./logIn');
+var logIn = new LogIn(1, viewMenu);
+var Validation = require('./validation');
+var validation = new Validation();
 
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -14,10 +20,8 @@ var connection = mysql.createConnection({
 connection.connect(function(error){
     if (error) console.log(error);
     // Prompts user for manager login credentials
-    var logIn = new LogIn(1, viewMenu);
     logIn.logInUser();
 });
-
 
 // Shows menu options through inquirer rawlist
 function viewMenu(){
@@ -115,13 +119,7 @@ function updateInventory(){
                 {
                     name: 'newQuantity',
                     message: 'Please enter the total desired units for this product:',
-                    // Validation requires that input is an integer greater than 0
-                    validate: function(input){
-                        if (isNaN(input) === false && input >= 0 && parseFloat(input) === parseInt(input)){
-                            return true;
-                        }
-                        return false;
-                    }
+                    validate: input => validation.validInt(input)
                 }
             ]).then(function(reply){
                 // identifies and assigns to new variable the object of current product
@@ -160,46 +158,22 @@ function addProduct(){
         {
             name: 'productName',
             message: 'Product name:',
-            // Validation requires that input is not null
-            validate: function(input){
-                if (input){
-                    return true;
-                }
-                return false;
-            }
+            validate: input => validation.validStr(input)
         },
         {
             name: 'department',
             message: 'Product department:',
-            // Validation requires that input is not null
-            validate: function(input){
-                if (input){
-                    return true;
-                }
-                return false;
-            }
+            validate: input => validation.validStr(input)
         },
         {
             name: 'productPrice',
             message: 'Price:',
-            // Validation requires that input is a number greater than 0 - accepts floats
-            validate: function(input){
-                if (isNaN(input) === false && input > 0){
-                    return true;
-                }
-                return false;
-            }
+            validate: input => validation.validNum(input)
         },
         {
             name: 'productQuantity',
             message: 'Stock Quantity:',
-            // Validation requires that input is an integer greater than 0
-            validate: function(input){
-                if (isNaN(input) === false && input > 0 && parseFloat(input) === parseInt(input)){
-                    return true;
-                }
-                return false;
-            }
+            validate: input => validation.validInt(input)
         }
     ]).then(function(reply){
         // inserting user input into bamazon
@@ -220,6 +194,7 @@ function addProduct(){
     });
 }
 
+// Enables manager to delete product from inventory
 function deleteProduct(){
     connection.query(
         'SELECT product_name, item_id FROM products',
@@ -276,8 +251,9 @@ function promptNextAction(){
     ).then(function(reply){
         if (reply.nextAction === 'Return to main menu'){
             viewMenu();
-        } else {
+        } else if (reply.nextAction === 'Logout'){
             console.log('Have a great day!');
+            logIn.logOutUser();
             connection.end();
         }
     });
