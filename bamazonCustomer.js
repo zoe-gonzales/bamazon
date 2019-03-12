@@ -4,7 +4,7 @@ var mysql = require('mysql');
 var inquirer = require('inquirer');
 
 // Constructor
-var Validation = require('./validation');
+var Validation = require('./constructors/validation');
 var validation = new Validation();
 
 var connection = mysql.createConnection({

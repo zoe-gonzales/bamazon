@@ -4,9 +4,9 @@ var mysql = require('mysql');
 var inquirer = require('inquirer');
 
 // Constructors
-var LogIn = require('./logIn');
+var LogIn = require('./constructors/logIn');
 var logIn = new LogIn(1, viewMenu);
-var Validation = require('./validation');
+var Validation = require('./constructors/validation');
 var validation = new Validation();
 
 var connection = mysql.createConnection({
