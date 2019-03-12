@@ -3,9 +3,29 @@
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 
+// Manager View Main Menu details
+var managerView = {
+    type: 'Manager',
+    options: ['View Products', 'View Products with Low Inventory', 'Update Current Inventory', 'Add New Product', 'Delete a Product', 'Logout'],
+    actions: {
+        action1: viewProducts,
+        action2: lowInventory,
+        action3: updateInventory,
+        action4: addProduct,
+        action5: deleteProduct,
+        action6: function(){
+            console.log('You have successfully logged out.');
+            logIn.logOutUser();
+            connection.end();
+        }
+    },
+}
+
 // Constructors
+var ViewMenu = require('./constructors/mainMenu');
+var view = new ViewMenu(managerView);
 var LogIn = require('./constructors/logIn');
-var logIn = new LogIn(1, viewMenu);
+var logIn = new LogIn(1, view.viewMainMenu);
 var Validation = require('./constructors/validation');
 var validation = new Validation();
 
@@ -22,42 +42,6 @@ connection.connect(function(error){
     // Prompts user for manager login credentials
     logIn.logInUser();
 });
-
-// Shows menu options through inquirer rawlist
-function viewMenu(){
-    console.log('Welcome to Bamazon Manager View!');
-    inquirer
-    .prompt(
-        {
-            type: 'rawlist',
-            message: 'Please select a menu item from the following:',
-            choices: ['View Products', 'View Products with Low Inventory', 'Update Current Inventory', 'Add New Product', 'Delete a Product', 'Logout'],
-            name: 'action'
-        }
-    ).then(function(reply){
-        switch (reply.action){
-            case 'View Products':
-                viewProducts();
-            break;
-            case 'View Products with Low Inventory':
-                lowInventory();
-            break;
-            case 'Update Current Inventory':
-                updateInventory();
-            break;
-            case 'Add New Product':
-                addProduct();
-            break;
-            case 'Delete a Product':
-                deleteProduct();
-            break;
-            case 'Logout':
-                console.log('You have successfully logged out.');
-                connection.end();
-            break;
-        }
-    });
-}
 
 // Selects and displays all products in bamazon db
 function viewProducts(){
@@ -250,7 +234,7 @@ function promptNextAction(){
         }
     ).then(function(reply){
         if (reply.nextAction === 'Return to main menu'){
-            viewMenu();
+            view.viewMainMenu();
         } else if (reply.nextAction === 'Logout'){
             console.log('Have a great day!');
             logIn.logOutUser();

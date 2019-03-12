@@ -3,7 +3,22 @@
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 
-// Constructor
+// Customer View Main Menu details
+var customerView = {
+    type: 'Customer',
+    options: ['Browse Bamazon', 'Exit'],
+    actions: {
+        action1: browseBamazon,
+        action2: function(){
+            console.log('Have a great day!');
+            connection.end();
+        },
+    }
+}
+
+// Constructors
+var ViewMenu = require('./constructors/mainMenu');
+var view = new ViewMenu(customerView);
 var Validation = require('./constructors/validation');
 var validation = new Validation();
 
@@ -17,25 +32,8 @@ var connection = mysql.createConnection({
 // connecting to bamazon db
 connection.connect(function(error){
     if (error) console.log(error);
-    start();
+    view.viewMainMenu();
 });
-
-// Runs immediately on connection - prompts user to browse bamazon or exit
-function start(){
-    inquirer
-    .prompt(
-        {
-            type: 'list',
-            choices: ['Browse Bamazon', 'Exit'],
-            name: 'action',
-            message: 'Welcome to Bamazon! Please select an action below'
-        }
-    ).then(function(reply){
-        if (reply.action === 'Browse Bamazon'){
-            browseBamazon();
-        } else connection.end();
-    });
-}
 
 // Runs select query to retrieve all products from bamazon db from the columns: product_name, item_id, and price
 function browseBamazon(){
@@ -152,14 +150,13 @@ function updateItemQuantity(obj){
                     if (error) throw error;
                     // Notification of successful update
                     console.log('Order placed!');
-                    start();
+                    view.viewMainMenu();
                 }
             );
         } else {
             // exits from product page and goes back to main menu
             console.log('Come back again soon!');
-            start();
+            view.viewMainMenu();
         }
     });
 }
-

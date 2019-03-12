@@ -4,12 +4,30 @@ var mysql = require('mysql');
 var inquirer = require('inquirer');
 const {table} = require('table');
 
+// Supervisor View Main Menu details
+var supervisorView = {
+    type: 'Supervisor',
+    options: ['View Product Sales by Department', 'Create New Department', 'Logout'],
+    actions: {
+        action1: viewSales,
+        action2: createDept,
+        action3: function(){
+            console.log('Thanks for visiting! Come back again soon!');
+            logIn.logOutUser();
+            connection.end();
+        }
+    }
+}
+
 // Constructors
-var LogIn = require('./constructors/logIn');
-var logIn = new LogIn(2, viewMenu);
 var Validation = require('./constructors/validation');
 var validation = new Validation();
+var ViewMenu = require('./constructors/mainMenu');
+var view = new ViewMenu(supervisorView);
+var LogIn = require('./constructors/logIn');
+var logIn = new LogIn(2, view.viewMainMenu);
 
+// Creating connection with mysql db
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -23,34 +41,6 @@ connection.connect(function(error){
     // Prompting for username and password to access main menu
     logIn.logInUser();
 });
-
-// Main menu view
-function viewMenu(){
-    console.log('Welcome to Bamazon Supervisor View!');
-    inquirer
-    .prompt(
-        {
-            type: 'rawlist',
-            message: 'Please select a menu item from the following:',
-            choices: ['View Product Sales by Department', 'Create New Department', 'Logout'],
-            name: 'action'
-        }
-    ).then(function(reply){
-        switch (reply.action){
-            case 'View Product Sales by Department':
-                viewSales();
-            break;
-            case 'Create New Department':
-                createDept();
-            break;
-            case 'Logout':
-                console.log('Thanks for visiting! Come back again soon!');
-                logIn.logOutUser();
-                connection.end();
-            break;
-        }
-    });
-}
 
 // Displays id, dept. name, overhead, total sales, and total profits for all departments
 function viewSales(){
@@ -93,7 +83,7 @@ function viewSales(){
             console.log(output);
 
             // Return to main menu
-            viewMenu();
+            view.viewMainMenu();
         }
     );
 }
@@ -130,7 +120,7 @@ function createDept(){
                 console.log(`${response.affectedRows} department successfully added.`);
                 
                 // Return to main menu
-                viewMenu();
+                view.viewMainMenu();
             }
         );
     }); 
