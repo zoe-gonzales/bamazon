@@ -12,7 +12,6 @@ var connection = mysql.createConnection({
 // connecting to bamazon db
 connection.connect(function(error){
     if (error) console.log(error);
-    // console.log('connected as id ' + connection.threadId);
     start();
 });
 

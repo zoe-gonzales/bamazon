@@ -1,6 +1,7 @@
 
 var mysql = require('mysql');
 var inquirer = require('inquirer');
+var LogIn = require('./logIn');
 
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -12,32 +13,11 @@ var connection = mysql.createConnection({
 // connecting to bamazon db
 connection.connect(function(error){
     if (error) console.log(error);
-    // console.log('connected as id ' + connection.threadId);
-    logIn();
+    // Prompts user for manager login credentials
+    var logIn = new LogIn(1, viewMenu);
+    logIn.logInUser();
 });
 
-// Prompts user for manager login credentials
-function logIn(){
-    inquirer
-    .prompt([
-        {
-            name: 'user',
-            message: 'Enter username:'
-        },
-        {
-            type: 'password',
-            message: 'Enter password',
-            name: 'pass'
-        }
-    ]).then(function(reply){
-        if (reply.user === 'manager' && reply.pass === 'hello'){
-            viewMenu();
-        } else {
-            console.log('Incorrect credentials. Please try again.');
-            logIn();
-        }
-    });
-}
 
 // Shows menu options through inquirer rawlist
 function viewMenu(){
@@ -72,7 +52,6 @@ function viewMenu(){
                 connection.end();
             break;
         }
-
     });
 }
 

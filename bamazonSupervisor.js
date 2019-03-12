@@ -2,6 +2,7 @@
 var mysql = require('mysql');
 var inquirer = require('inquirer');
 const {table} = require('table');
+var LogIn = require('./logIn');
 
 var connection = mysql.createConnection({
     host: 'localhost',
@@ -13,32 +14,10 @@ var connection = mysql.createConnection({
 // connecting to bamazon db
 connection.connect(function(error){
     if (error) console.log(error);
-    // console.log('connected as id ' + connection.threadId);
-    logIn();
+    // Prompting for username and password to access main menu
+    var logIn = new LogIn(2, viewMenu);
+    logIn.logInUser();
 });
-
-// Prompting for username and password to access main menu
-function logIn(){
-    inquirer
-    .prompt([
-        {
-            name: 'user',
-            message: 'Enter username:'
-        },
-        {
-            type: 'password',
-            name: 'pass',
-            message: 'Enter password:'
-        }
-    ]).then(function(reply){
-        if (reply.user === 'supervisor' && reply.pass === 'hola'){
-            viewMenu();
-        } else {
-            console.log('Incorrect credentials. Please try again.');
-            logIn();
-        }
-    });
-}
 
 // Main menu view
 function viewMenu(){
@@ -77,7 +56,7 @@ function viewSales(){
     // select query for department_id, departments.department_name, over_head_costs, product_sales
     // left join on dept. ana product ids
     connection.query(
-        'SELECT department_id, departments.department_name, over_head_costs, product_sales FROM departments LEFT JOIN products ON departments.department_id = products.item_id',
+        'SELECT department_id, departments.department_name, over_head_costs, product_sales FROM departments INNER JOIN products ON departments.department_name = products.department_name',
         function(error, response){
 
             if (error) throw error;
