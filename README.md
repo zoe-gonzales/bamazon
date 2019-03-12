@@ -16,33 +16,33 @@ inquirer, mysql, table
 
 ## Customer view
 Bamazon browse view
-![Bamazon Browse View](images/customer_1)
+![Bamazon Browse View](./images/customer_1.png)
 
 Selecting a product for purchase
-![Selecting a product for purchase](images/customer_2)
+![Selecting a product for purchase](./images/customer_2.png)
 
 Product purchased
-![Product purchased](images/customer_3)
+![Product purchased](./images/customer_3.png)
 
 Demo: coming soon
 
 ## Manager View
 Manager main menu
-![Manager main menu](images/manager_1)
+![Manager main menu](./images/manager_1.png)
 
 Updating inventory for selected product
-![Updating inventory for selected product](images/manager_2)
+![Updating inventory for selected product](./images/manager_2.png)
 
 Inventory updated
-![Inventory updated](images/manager_3)
+![Inventory updated](./images/manager_3.png)
 
 Demo: coming soon
 
 ## Supervisor View
 Supervisor main menu
-![Supervisor main menu](images/supervisor_1)
+![Supervisor main menu](./images/supervisor_1.png)
 
 Total Sales by department
-![Total Sales by department](images/supervisor_2)
+![Total Sales by department](./images/supervisor_2.png)
 
 Demo: coming soon
