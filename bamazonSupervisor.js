@@ -75,7 +75,8 @@ function viewSales(){
                 var totalSales = response[i].product_sales;
                 var profit = totalProfit(overHead, totalSales);
                 var deptName = response[i].department_name;
-                department.push(deptID, deptName, overHead, totalSales, profit);data.push(department);
+                department.push(deptID, deptName, overHead, totalSales, profit);
+                data.push(department);
             }
 
             // transform and display data
@@ -96,13 +97,11 @@ function createDept(){
         {
             name: 'departmentName',
             message: 'Department name:',
-            // Validation requires that input is not null
             validate: input => validation.validStr(input)
         },
         {
             name: 'overhead',
             message: 'Department overhead costs:',
-            // Validation requires that input is a number greater than 0
             validate: input => validation.validNum(input)
         }
     ]).then(function(reply){
